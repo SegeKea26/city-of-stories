@@ -1,33 +1,42 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  --clr-bg: #1a1520;
+  --clr-primary: #F4E9FF;
+  --clc-primary: 244, 233, 255;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --ff-primary: "Playfair Display";
+  --ff-secondary: "Lato";
 }
 
-* {
-  margin: 0;
-  padding: 0;
+
+body { 
+  margin: 0; 
+  padding: 0;  
   box-sizing: border-box;
-}
 
-body {
-  margin: 0;
-  display: flex;
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
-}
+  width: 100svw;
+  height: 100svh;
 
-#root {
-  width: 100%;
-  height: 100%;
+  overflow: hidden;
+  
+  display: grid;
+  grid-template-rows: 6rem 1fr 3rem;
+  grid-template-columns: 1fr;
+  
+  position: relative;
+
+  background:
+    radial-gradient(circle at 50% 25%, rgba(255, 224, 204, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 50% 120%, rgba(255, 235, 200, 0.05) 0%, rgba(20, 15, 25, 0.15) 70%);
+  background-color: var(--clr-bg);
+
+  &::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.4) 100%);
+    z-index: 1;
+  }
 }
