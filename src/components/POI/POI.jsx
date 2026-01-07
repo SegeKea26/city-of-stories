@@ -6,7 +6,7 @@ export function POI({ position, onClick }) {
     <group position={position}>
       <Html>
         <div className="poi" onClick={onClick}>
-          <div className="poi-dot" />
+          <div className="poi__dot" />
         </div>
       </Html>
     </group>

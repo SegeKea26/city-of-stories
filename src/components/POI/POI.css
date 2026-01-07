@@ -2,42 +2,23 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: .5rem;
+
   cursor: pointer;
-  user-select: none;
   background-color: transparent;
-}
 
-.poi-dot {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #003f7f;
-  border: 2px solid white;
-  box-shadow: 0 0 10px rgba(0, 63, 127, 0.6);
-  transition: all 0.3s ease;
-}
+  .poi__dot {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
 
-.poi:hover .poi-dot {
-  width: 20px;
-  height: 20px;
-  box-shadow: 0 0 15px rgba(0, 63, 127, 0.9);
-  background: #0056b3;
-}
+    transition: all 0.2s ease;
 
-.poi-label {
-  background: #003f7f;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
+    background: rgba(var(--clc-primary), 0.5);
+  }
 
-.poi:hover .poi-label {
-  opacity: 1;
+  &:hover .poi__dot {
+    transform: scale(1.125);
+    background: var(--clr-primary);
+  }
 }
