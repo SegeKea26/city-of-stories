@@ -1,0 +1,26 @@
+.footer {
+  color: rgba(var(--clc-primary), 0.8);
+
+  width: 100%;
+  max-width: 64rem;
+  margin: auto;
+
+  .footer__text {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    margin: 0;
+
+    font-family: var(--ff-secondary), sans-serif;
+
+    &::before,
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+
+      background-color: currentColor;
+    }
+  }
+}
