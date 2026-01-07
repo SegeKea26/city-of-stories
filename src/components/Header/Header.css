@@ -1,0 +1,26 @@
+.header { 
+  color: var(--clr-primary);
+
+  width: 100%;
+  max-width: 64rem;
+  margin: auto;
+
+  .header__title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    
+    margin: 0;
+
+    font-family: var(--ff-primary);
+
+    &::before, &::after { 
+      content: '';
+      flex: 1;
+      height: 1px;
+
+      background-color: currentColor;
+    }
+  }
+}
+
