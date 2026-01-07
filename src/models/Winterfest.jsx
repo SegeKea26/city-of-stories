@@ -56,7 +56,6 @@ export function Winterfest(props) {
         <POI position={[7, 3, 32]} label="Fishing Game" onClick={() => handlePOIClick('Fishing Game')} />
         <POI position={[-13.5, 3, 13]} label="Luna Park" onClick={() => handlePOIClick('Luna Park')} />
         <POI position={[12, 3, -22]} label="Cecemel Cabin" onClick={() => handlePOIClick('Cecemel Cabin')} />
-        <POI position={[25, 3, -6]} label="Food Street" onClick={() => handlePOIClick('Food Street')} />
 
 
         <group name="tree-part-path" position={[26.258, 0, -4.334]} scale={1.682} />
