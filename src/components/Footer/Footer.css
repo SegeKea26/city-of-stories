@@ -1,5 +1,10 @@
 .footer {
-  color: rgba(var(--clc-primary), 0.8);
+  color: rgba(244, 233, 255, 0.8);
+
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
 
   width: 100%;
   max-width: 64rem;

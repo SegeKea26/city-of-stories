@@ -1,0 +1,28 @@
+.themer__button {
+  position: fixed;
+  top: 5.25rem;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  z-index: 100;
+  
+  border: none;
+  background-color: transparent;
+
+  color: #F4E9FF;
+  transition: all 0.3s ease;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  & svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      fill: currentColor;
+  }
+}

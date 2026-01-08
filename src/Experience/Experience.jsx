@@ -3,7 +3,6 @@ import React, { useRef } from "react"
 import { Canvas, useThree } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 
-import { Notification } from "../components/Notification/Notification"
 import { POIInfo } from "../components/POIInfo/POIInfo"
 import { Button } from "../components/Button/Button"
 import { Loader } from "../components/Loader/Loader"
@@ -58,8 +57,6 @@ const Experience = () => {
     setIsViewingPOI,
     isFollowingCart,
     setIsFollowingCart,
-    showWheelCashierNotification,
-    setShowWheelCashierNotification,
     currentPOIInfo,
     setCurrentPOIInfo
   } = usePOIManager()
@@ -69,25 +66,15 @@ const Experience = () => {
       cameraAnimationRef.current.goBack()
     }
     setCurrentPOIInfo({ label: '', text: '' })
-    setShowWheelCashierNotification(false)
     setIsFollowingCart(false)
   }
 
   const handleExitWheel = () => {
     setIsFollowingCart(false)
-    setShowWheelCashierNotification(true)
-    setCurrentPOIInfo({ label: 'Wheel Cashier', text: 'The central hub of the winter fair where visitors can purchase tickets and souvenirs.' })
+    setCurrentPOIInfo({ label: '', text: '' })
     if (cameraAnimationRef.current) {
       cameraAnimationRef.current([-0.5, 2, 5])
     }
-  }
-
-  const handleEnterFerrisWheel = () => {
-    if (restartAnimationRef.current) {
-      restartAnimationRef.current()
-    }
-    setIsFollowingCart(true)
-    setShowWheelCashierNotification(false)
   }
 
   const handlePOIClick = (position, label, text) => {
@@ -96,12 +83,6 @@ const Experience = () => {
     setCurrentPOIInfo({ label, text })
     if (cameraAnimationRef.current) {
       cameraAnimationRef.current(position)
-    }
-    
-    if (label === "Wheel Cashier") {
-      setShowWheelCashierNotification(true)
-    } else {
-      setShowWheelCashierNotification(false)
     }
   }
 
@@ -115,7 +96,14 @@ const Experience = () => {
 
   return (
     <>
-      <Canvas shadows className="canvas">
+      <Canvas 
+        shadows 
+        className="canvas"
+        gl={{ 
+          antialias: true,
+          powerPreference: 'high-performance'
+        }}
+      >
         <fog attach="fog" args={['#1a1520', 50, 200]} />
         
         <PerspectiveCamera makeDefault position={[0, 40, 80]} fov={50} />
@@ -145,16 +133,7 @@ const Experience = () => {
         label="Back" 
       />
 
-      {showWheelCashierNotification && (
-        <button 
-          className="enter-ferris-button"
-          onClick={handleEnterFerrisWheel}
-        >
-          {isFollowingCart ? "Exit Wheel" : "Enter Ferris Wheel"}
-        </button>
-      )}
-
-      {isFollowingCart && !showWheelCashierNotification && (
+      {isFollowingCart && (
         <button 
           className="enter-ferris-button"
           onClick={handleExitWheel}
@@ -162,11 +141,6 @@ const Experience = () => {
           Exit Wheel
         </button>
       )}
-
-      <Notification 
-        visible={showWheelCashierNotification}
-        message="Today is your lucky day! all rides are now free in this experience."
-      />
 
       <POIInfo visible={isViewingPOI && !isFollowingCart} label={currentPOIInfo.label} text={currentPOIInfo.text} />
     </>

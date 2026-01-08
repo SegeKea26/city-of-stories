@@ -12,7 +12,7 @@
     position: absolute;
     top: -2.2rem;
     background-color: rgba(30, 21, 32, 0.95);
-    color: var(--clr-primary);
+    color: #F4E9FF;
     padding: 0.4rem 0.8rem;
     border-radius: 3px;
     font-family: var(--ff-secondary, "Lato");
@@ -29,12 +29,12 @@
 
     transition: all 0.2s ease;
 
-    background: rgba(var(--clc-primary), 0.5);
+    background: rgba(244, 233, 255, 0.5);
   }
 
   &:hover .poi__dot {
     transform: scale(1.125);
-    background: var(--clr-primary);
+    background: #F4E9FF;
   }
 }
 

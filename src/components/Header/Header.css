@@ -1,5 +1,12 @@
 .header { 
-  color: var(--clr-primary);
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+
+  z-index: 100;
+
+  color: #F4E9FF;
 
   width: 100%;
   max-width: 64rem;
