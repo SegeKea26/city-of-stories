@@ -27,9 +27,11 @@ export function Winterfest(props) {
         'RubberDuck_mat1': { color: 0xffd700, roughness: 0.7, metalness: 0 },
         'sharkplush': { color: 0x4a4a4a, roughness: 0.8, metalness: 0 },
         'Plush_Unicorn': { color: 0xffb6c1, roughness: 0.8, metalness: 0 },
+        'Plush_Unicorn.001': { color: 0xffb6c1, roughness: 0.8, metalness: 0 },
         '125308548_3739461046085123_7101765768051295415_n-edit': { color: 0x8b4513, roughness: 0.6, metalness: 0 },
         'Painted old wood.001': { color: 0x8b6f47, roughness: 0.7, metalness: 0 },
-        'Lightly soiled white metal': { color: 0xe8e8e8, roughness: 0.4, metalness: 0.6 }
+        'Lightly soiled white metal': { color: 0xe8e8e8, roughness: 0.4, metalness: 0.6 },
+        'Scene_-_Root': { color: 0xd4af37, roughness: 0.5, metalness: 0.3 }
       }
       
       Object.keys(materials).forEach((matName) => {
