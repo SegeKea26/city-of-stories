@@ -1,5 +1,5 @@
 import * as THREE from "three"
-import React, { useRef, useState, useEffect } from "react"
+import React, { useRef } from "react"
 import { Canvas, useThree } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 
@@ -9,7 +9,7 @@ import { Button } from "../components/Button/Button"
 import { Loader } from "../components/Loader/Loader"
 import Winterfest from "../models/Winterfest"
 
-import { useCameraAnimation, usePOIManager, useOrbitControlsSettings, useCartCameraFollower, usePOICameraLookAround } from "../hooks"
+import { useCameraAnimation, usePOIManager, useOrbitControlsSettings, useCartCameraFollower, usePOICameraLookAround, useLoadingProgress } from "../hooks"
 
 const CartCameraFollower = ({ cartPositionRef, isFollowing }) => {
   useCartCameraFollower(cartPositionRef, isFollowing)
@@ -50,8 +50,8 @@ const Experience = () => {
   const cameraAnimationRef = useRef()
   const restartAnimationRef = useRef()
   const cartPositionRef = useRef([0, 0, 0])
-  const [isLoading, setIsLoading] = useState(true)
-  const [loadProgress, setLoadProgress] = useState(0)
+  
+  const { isLoading, loadProgress, handleModelLoaded } = useLoadingProgress()
   
   const {
     isViewingPOI,
@@ -63,29 +63,6 @@ const Experience = () => {
     currentPOIInfo,
     setCurrentPOIInfo
   } = usePOIManager()
-
-  const handleModelLoaded = () => {
-    setLoadProgress(100)
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 300)
-  }
-
-  useEffect(() => {
-    if (!isLoading || loadProgress === 100) return
-    
-    let currentProgress = loadProgress
-    const interval = setInterval(() => {
-      currentProgress += Math.random() * 25
-      if (currentProgress > 85) {
-        currentProgress = 85
-        clearInterval(interval)
-      }
-      setLoadProgress(Math.round(currentProgress))
-    }, 400)
-
-    return () => clearInterval(interval)
-  }, [isLoading, loadProgress])
 
   const handleBackClick = () => {
     if (cameraAnimationRef.current?.goBack) {
