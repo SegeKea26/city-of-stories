@@ -11,7 +11,7 @@ import * as THREE from 'three'
 import { POI } from '../components/POI/POI'
 
 export function Winterfest(props) {
-  const { onPOIClick } = props
+  const { onPOIClick, onCartPositionUpdate, onRestartAnimation } = props
   const group = React.useRef()
   const { nodes, materials, animations } = useGLTF('/model/wanterfest.glb')
   const { actions } = useAnimations(animations, group)
@@ -25,6 +25,13 @@ export function Winterfest(props) {
           if (cart) {
             cart.rotation.z = -wheelRoot.rotation.z
           }
+        }
+        
+        const trackedCart = wheelRoot.getObjectByName('cart_PIVOT001')
+        if (trackedCart && onCartPositionUpdate) {
+          const worldPosition = new THREE.Vector3()
+          trackedCart.getWorldPosition(worldPosition)
+          onCartPositionUpdate([worldPosition.x, worldPosition.y, worldPosition.z])
         }
       }
     }
@@ -42,8 +49,18 @@ export function Winterfest(props) {
           wheelAnimation.timeScale = 0.3
         }, 0)
       }
+      
+      if (onRestartAnimation) {
+        onRestartAnimation(() => {
+          if (wheelAnimation) {
+            wheelAnimation.reset()
+            wheelAnimation.play()
+            wheelAnimation.timeScale = 0.3
+          }
+        })
+      }
     }
-  }, [actions, animations])
+  }, [actions, animations, onRestartAnimation])
   
   const handlePOIClick = (position, label, text) => {
     if (onPOIClick) {

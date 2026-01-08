@@ -1,0 +1,31 @@
+.enter-ferris-button {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+
+  padding: 0.875rem 2rem;
+  border: 2px solid var(--clr-primary);
+  background-color: transparent;
+  color: var(--clr-primary);
+  font-family: var(--ff-secondary, "Lato");
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 0.375rem;
+  white-space: nowrap;
+}
+
+.enter-ferris-button:hover {
+  background-color: var(--clr-primary);
+  color: var(--clr-bg);
+  border-color: var(--clr-primary);
+}
+
+.enter-ferris-button:active {
+  transform: translateX(-50%) scale(0.98);
+}
+
