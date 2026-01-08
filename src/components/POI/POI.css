@@ -6,6 +6,21 @@
 
   cursor: pointer;
   background-color: transparent;
+  position: relative;
+
+  .poi__label {
+    position: absolute;
+    top: -2.2rem;
+    background-color: rgba(30, 21, 32, 0.95);
+    color: var(--clr-primary);
+    padding: 0.4rem 0.8rem;
+    border-radius: 3px;
+    font-family: var(--ff-secondary, "Lato");
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    animation: fadeIn 0.2s ease;
+  }
 
   .poi__dot {
     width: 1rem;
@@ -20,5 +35,16 @@
   &:hover .poi__dot {
     transform: scale(1.125);
     background: var(--clr-primary);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

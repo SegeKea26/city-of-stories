@@ -11,6 +11,7 @@ import * as THREE from 'three'
 import { POI } from '../components/POI/POI'
 
 export function Winterfest(props) {
+  const { onPOIClick } = props
   const group = React.useRef()
   const { nodes, materials, animations } = useGLTF('/model/wanterfest.glb')
   const { actions } = useAnimations(animations, group)
@@ -44,19 +45,20 @@ export function Winterfest(props) {
     }
   }, [actions, animations])
   
-  const handlePOIClick = (label) => {
-    console.log(`Clicked: ${label}`)
+  const handlePOIClick = (position, label, text) => {
+    if (onPOIClick) {
+      onPOIClick(position, label, text)
+    }
   }
   
   return (
     <group ref={group} {...props} dispose={null}>
       <group name="Scene">
-        <POI position={[-32, 3, -4]} label="Red Cabin" onClick={() => handlePOIClick('Red Cabin')} />
-        <POI position={[-0.5, 3, 3]} label="Wheel Cashier" onClick={() => handlePOIClick('Wheel Cashier')} />
-        <POI position={[7, 3, 32]} label="Fishing Game" onClick={() => handlePOIClick('Fishing Game')} />
-        <POI position={[-13.5, 3, 13]} label="Luna Park" onClick={() => handlePOIClick('Luna Park')} />
-        <POI position={[12, 3, -22]} label="Cecemel Cabin" onClick={() => handlePOIClick('Cecemel Cabin')} />
-
+        <POI position={[-30, 2, -4]} label="Red Cabin" text="A cozy cabin painted in bright red, offering warmth and comfort in the winter festivities." onClick={() => handlePOIClick([-30, 2, -4], 'Red Cabin', 'A cozy cabin painted in bright red, offering warmth and comfort in the winter festivities.')} />
+        <POI position={[-0.5, 2, 5]} label="Wheel Cashier" text="The central hub of the winter fair where visitors can purchase tickets and souvenirs." onClick={() => handlePOIClick([-0.5, 2, 5], 'Wheel Cashier', 'The central hub of the winter fair where visitors can purchase tickets and souvenirs.')} />
+        <POI position={[7, 2, 32]} label="Fishing Game" text="Try your luck at this traditional ice fishing game. Test your skills and win prizes!" onClick={() => handlePOIClick([7, 2, 32], 'Fishing Game', 'Try your luck at this traditional ice fishing game. Test your skills and win prizes!')} />
+        <POI position={[-13.5, 2, 13]} label="Luna Park" text="A magical amusement area with festive rides and attractions for the whole family." onClick={() => handlePOIClick([-13.5, 2, 13], 'Luna Park', 'A magical amusement area with festive rides and attractions for the whole family.')} />
+        <POI position={[12, 2, -22]} label="Cecemel Cabin" text="Enjoy hot chocolate and warm cecemel drinks in this delightful seasonal cabin." onClick={() => handlePOIClick([12, 2, -22], 'Cecemel Cabin', 'Enjoy hot chocolate and warm cecemel drinks in this delightful seasonal cabin.')} />
 
         <group name="tree-part-path" position={[26.258, 0, -4.334]} scale={1.682} />
         <group name="tree-part-path001" position={[26.258, 0, -15.667]} scale={1.682} />

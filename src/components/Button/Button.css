@@ -1,0 +1,32 @@
+.button {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 10;
+
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #F4E9FF;
+  background-color: transparent;
+  color: #F4E9FF;
+  font-family: var(--ff-secondary, "Lato");
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  border-radius: .25rem;
+}
+
+.button:hover {
+  background-color: #F4E9FF;
+  color: #1a1520;
+}
+
+.button--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.button--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
