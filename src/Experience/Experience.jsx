@@ -1,11 +1,12 @@
 import * as THREE from "three"
-import { useRef } from "react"
+import React, { useRef, useState, useEffect } from "react"
 import { Canvas, useThree } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 
 import { Notification } from "../components/Notification/Notification"
 import { POIInfo } from "../components/POIInfo/POIInfo"
 import { Button } from "../components/Button/Button"
+import { Loader } from "../components/Loader/Loader"
 import Winterfest from "../models/Winterfest"
 
 import { useCameraAnimation, usePOIManager, useOrbitControlsSettings, useCartCameraFollower, usePOICameraLookAround } from "../hooks"
@@ -49,6 +50,8 @@ const Experience = () => {
   const cameraAnimationRef = useRef()
   const restartAnimationRef = useRef()
   const cartPositionRef = useRef([0, 0, 0])
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadProgress, setLoadProgress] = useState(0)
   
   const {
     isViewingPOI,
@@ -60,6 +63,29 @@ const Experience = () => {
     currentPOIInfo,
     setCurrentPOIInfo
   } = usePOIManager()
+
+  const handleModelLoaded = () => {
+    setLoadProgress(100)
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 300)
+  }
+
+  useEffect(() => {
+    if (!isLoading || loadProgress === 100) return
+    
+    let currentProgress = loadProgress
+    const interval = setInterval(() => {
+      currentProgress += Math.random() * 25
+      if (currentProgress > 85) {
+        currentProgress = 85
+        clearInterval(interval)
+      }
+      setLoadProgress(Math.round(currentProgress))
+    }, 400)
+
+    return () => clearInterval(interval)
+  }, [isLoading, loadProgress])
 
   const handleBackClick = () => {
     if (cameraAnimationRef.current?.goBack) {
@@ -131,8 +157,11 @@ const Experience = () => {
           onPOIClick={handlePOIClick}
           onCartPositionUpdate={handleCartPositionUpdate}
           onRestartAnimation={handleRestartAnimation}
+          onModelLoaded={handleModelLoaded}
         />
       </Canvas>
+      
+      <Loader isLoading={isLoading} progress={loadProgress} />
       <Button 
         visible={isViewingPOI} 
         onClick={handleBackClick} 
@@ -161,7 +190,7 @@ const Experience = () => {
         visible={showWheelCashierNotification}
         message="Today is your lucky day! all rides are now free in this experience."
       />
-      
+
       <POIInfo visible={isViewingPOI && !isFollowingCart} label={currentPOIInfo.label} text={currentPOIInfo.text} />
     </>
   )

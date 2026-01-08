@@ -11,10 +11,22 @@ import * as THREE from 'three'
 import { POI } from '../components/POI/POI'
 
 export function Winterfest(props) {
-  const { onPOIClick, onCartPositionUpdate, onRestartAnimation } = props
+  const { onPOIClick, onCartPositionUpdate, onRestartAnimation, onModelLoaded } = props
   const group = React.useRef()
   const { nodes, materials, animations } = useGLTF('/model/wanterfest.glb')
   const { actions } = useAnimations(animations, group)
+  
+  useEffect(() => {
+    if (nodes && materials && group.current) {
+      const loadTimer = setTimeout(() => {
+        if (onModelLoaded) {
+          onModelLoaded()
+        }
+      }, 800)
+      
+      return () => clearTimeout(loadTimer)
+    }
+  }, [nodes, materials, onModelLoaded])
   
   useFrame(() => {
     if (group.current) {
