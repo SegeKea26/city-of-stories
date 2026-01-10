@@ -2,9 +2,9 @@ import { useEffect } from 'react'
 import { useThree } from '@react-three/fiber'
 import { useMouseDrag } from './useMouseDrag'
 
-export const usePOICameraLookAround = (isViewingPOI) => {
+export const usePOICameraLookAround = (isViewingPOI, cameraMode) => {
   const { camera } = useThree()
-  const { cameraRotation, euler } = useMouseDrag(isViewingPOI)
+  const { cameraRotation, euler } = useMouseDrag(isViewingPOI, cameraMode)
 
   useEffect(() => {
     let animationFrameId

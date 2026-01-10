@@ -1,11 +1,13 @@
 import { useEffect } from 'react'
 
-export const useOrbitControlsSettings = (orbitControlsRef, isViewingPOI, isFollowingCart) => {
+export const useOrbitControlsSettings = (orbitControlsRef, isViewingPOI, isTourMode, isFollowingCart) => {
   useEffect(() => {
     if (orbitControlsRef.current) {
       if (isFollowingCart) {
         orbitControlsRef.current.enabled = false
-      } else if (isViewingPOI) {
+      } else if (isTourMode) {
+        orbitControlsRef.current.enabled = false
+      } else if (isViewingPOI && !isTourMode) {
         orbitControlsRef.current.enabled = false
       } else {
         orbitControlsRef.current.enabled = true
@@ -13,5 +15,5 @@ export const useOrbitControlsSettings = (orbitControlsRef, isViewingPOI, isFollo
         orbitControlsRef.current.maxPolarAngle = Math.PI / 2.5
       }
     }
-  }, [isViewingPOI, isFollowingCart, orbitControlsRef])
+  }, [isViewingPOI, isTourMode, isFollowingCart, orbitControlsRef])
 }

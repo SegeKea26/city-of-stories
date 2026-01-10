@@ -2,9 +2,9 @@ import { useEffect } from 'react'
 import { useThree } from '@react-three/fiber'
 import { useMouseDrag } from './useMouseDrag'
 
-export const useCartCameraFollower = (cartPositionRef, isFollowing) => {
+export const useCartCameraFollower = (cartPositionRef, isFollowing, cameraMode = 'grab') => {
   const { camera } = useThree()
-  const { cameraRotation } = useMouseDrag(isFollowing)
+  const { cameraRotation } = useMouseDrag(isFollowing, cameraMode)
 
   useEffect(() => {
     let animationFrameId

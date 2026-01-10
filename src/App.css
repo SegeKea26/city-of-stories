@@ -6,9 +6,9 @@
   z-index: 10;
 
   padding: 0.875rem 2rem;
-  border: 2px solid var(--clr-primary);
+  border: 2px solid #F4E9FF;
   background-color: transparent;
-  color: var(--clr-primary);
+  color: #F4E9FF;
   font-family: var(--ff-secondary, "Lato");
   font-size: 1rem;
   font-weight: 500;
@@ -20,9 +20,9 @@
 }
 
 .enter-ferris-button:hover {
-  background-color: var(--clr-primary);
-  color: var(--clr-bg);
-  border-color: var(--clr-primary);
+  background-color: #F4E9FF;
+  color: #19141f;
+  border-color: #F4E9FF;
 }
 
 .enter-ferris-button:active {

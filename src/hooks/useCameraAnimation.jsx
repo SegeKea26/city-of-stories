@@ -2,52 +2,40 @@ import gsap from 'gsap'
 import * as THREE from 'three'
 import { useRef, useEffect } from 'react'
 
-export const useCameraAnimation = (camera, onPOIEnter, cameraAnimationRef) => {
+export const useCameraAnimation = (camera, onPOIEnter, cameraAnimationRef, onAnimationComplete) => {
   const defaultPositionRef = useRef({ x: 0, y: 40, z: 80 })
   const orbitControlsRef = useRef()
   const functionsRef = useRef({})
-  const poiLookAtRef = useRef(null)
+  const lookAroundTimelineRef = useRef(null)
 
   useEffect(() => {
-    let animationFrameId
-    
-    const continueLookAt = () => {
-      if (poiLookAtRef.current) {
-        const [x, y, z] = poiLookAtRef.current
-        const currentPos = camera.position.clone()
-        const directionToTarget = new THREE.Vector3(
-          x - currentPos.x,
-          y - currentPos.y,
-          z - currentPos.z
-        ).normalize()
-        
-        camera.lookAt(
-          currentPos.x + directionToTarget.x * 10,
-          currentPos.y + directionToTarget.y * 10,
-          currentPos.z + directionToTarget.z * 10
-        )
-      }
-      animationFrameId = requestAnimationFrame(continueLookAt)
-    }
-    
-    animationFrameId = requestAnimationFrame(continueLookAt)
-
-    return () => {
-      if (animationFrameId) cancelAnimationFrame(animationFrameId)
-    }
-  }, [camera])
-
-  useEffect(() => {
-    functionsRef.current.animateCameraToPosition = (targetPosition) => {
+    functionsRef.current.animateCameraToPosition = (targetPosition, cameraPosition) => {
       onPOIEnter(true)
-      poiLookAtRef.current = targetPosition
+      
+      if (lookAroundTimelineRef.current) {
+        lookAroundTimelineRef.current.kill()
+        lookAroundTimelineRef.current = null
+      }
+      gsap.killTweensOf({ angle: 0 })
+      gsap.killTweensOf({ vertical: 0 })
 
-      const cameraOffset = [0, 0, 2]
-      const cameraPosition = [
-        targetPosition[0] + cameraOffset[0],
-        targetPosition[1] + cameraOffset[1],
-        targetPosition[2] + cameraOffset[2]
-      ]
+      let finalCameraPosition = cameraPosition
+      if (!cameraPosition) {
+        const directionFromPOI = new THREE.Vector3(
+          camera.position.x - targetPosition[0],
+          camera.position.y - targetPosition[1],
+          camera.position.z - targetPosition[2]
+        )
+        
+        const viewingDistance = 3.5
+        directionFromPOI.normalize().multiplyScalar(viewingDistance)
+        
+        finalCameraPosition = [
+          targetPosition[0] + directionFromPOI.x,
+          targetPosition[1] + directionFromPOI.y,
+          targetPosition[2] + directionFromPOI.z
+        ]
+      }
 
       const startPosition = {
         x: camera.position.x,
@@ -55,31 +43,190 @@ export const useCameraAnimation = (camera, onPOIEnter, cameraAnimationRef) => {
         z: camera.position.z
       }
 
-      gsap.to(startPosition, {
-        x: cameraPosition[0],
-        y: cameraPosition[1],
-        z: cameraPosition[2],
-        duration: 3,
-        ease: 'power1.inOut',
-        onUpdate: () => {
-          camera.position.set(startPosition.x, startPosition.y, startPosition.z)
+      const timeline = gsap.timeline()
+
+      timeline.to(
+        startPosition,
+        {
+          x: finalCameraPosition[0],
+          y: finalCameraPosition[1],
+          z: finalCameraPosition[2],
+          duration: 4,
+          ease: 'power1.inOut',
+          onUpdate: () => {
+            camera.position.set(startPosition.x, startPosition.y, startPosition.z)
+            camera.lookAt(targetPosition[0], targetPosition[1], targetPosition[2])
+          },
+          onComplete: () => {
+            camera.lookAt(targetPosition[0], targetPosition[1], targetPosition[2])
+            functionsRef.current.startLookAround(targetPosition)
+          }
         }
-      })
+      )
+
 
       if (orbitControlsRef.current) {
         gsap.to(orbitControlsRef.current.target, {
           x: targetPosition[0],
           y: targetPosition[1],
           z: targetPosition[2],
-          duration: 3,
+          duration: 4,
           ease: 'power1.inOut'
         })
       }
     }
 
+    functionsRef.current.startLookAround = (targetPosition) => {
+      const dx = Math.abs(camera.position.x - targetPosition[0])
+      const dz = Math.abs(camera.position.z - targetPosition[2])
+      
+      const useZForLookAround = dx > dz
+      
+      if (onAnimationComplete) {
+        onAnimationComplete()
+      }
+      
+      const lookAroundTimeline = gsap.timeline({ repeat: -1 })
+      lookAroundTimelineRef.current = lookAroundTimeline
+      
+      lookAroundTimeline
+        .to(
+          { angle: 0 },
+          {
+            angle: 1,
+            duration: 5,
+            ease: 'sine.inOut',
+            onUpdate: function() {
+              const offset = this.targets()[0].angle
+              if (useZForLookAround) {
+                camera.lookAt(
+                  targetPosition[0],
+                  targetPosition[1],
+                  targetPosition[2] - offset * 2
+                )
+              } else {
+                camera.lookAt(
+                  targetPosition[0] - offset * 2,
+                  targetPosition[1],
+                  targetPosition[2]
+                )
+              }
+            }
+          }
+        )
+        .to(
+          { angle: 1 },
+          {
+            angle: 0,
+            duration: 5,
+            ease: 'sine.inOut',
+            onUpdate: function() {
+              const offset = this.targets()[0].angle
+              if (useZForLookAround) {
+                camera.lookAt(
+                  targetPosition[0],
+                  targetPosition[1],
+                  targetPosition[2] - offset * 2
+                )
+              } else {
+                camera.lookAt(
+                  targetPosition[0] - offset * 2,
+                  targetPosition[1],
+                  targetPosition[2]
+                )
+              }
+            }
+          }
+        )
+        .to(
+          { angle: 0 },
+          {
+            angle: -1,
+            duration: 5,
+            ease: 'sine.inOut',
+            onUpdate: function() {
+              const offset = this.targets()[0].angle
+              if (useZForLookAround) {
+                camera.lookAt(
+                  targetPosition[0],
+                  targetPosition[1],
+                  targetPosition[2] - offset * 2
+                )
+              } else {
+                camera.lookAt(
+                  targetPosition[0] - offset * 2,
+                  targetPosition[1],
+                  targetPosition[2]
+                )
+              }
+            }
+          }
+        )
+        .to(
+          { angle: -1 },
+          {
+            angle: 0,
+            duration: 5,
+            ease: 'sine.inOut',
+            onUpdate: function() {
+              const offset = this.targets()[0].angle
+              if (useZForLookAround) {
+                camera.lookAt(
+                  targetPosition[0],
+                  targetPosition[1],
+                  targetPosition[2] - offset * 2
+                )
+              } else {
+                camera.lookAt(
+                  targetPosition[0] - offset * 2,
+                  targetPosition[1],
+                  targetPosition[2]
+                )
+              }
+            }
+          }
+        )
+        .to(
+          { vertical: 0 },
+          {
+            vertical: 1,
+            duration: 5,
+            ease: 'sine.inOut',
+            onUpdate: function() {
+              const offset = this.targets()[0].vertical
+              camera.lookAt(
+                targetPosition[0],
+                targetPosition[1] + offset * 1.5,
+                targetPosition[2]
+              )
+            }
+          }
+        )
+        .to(
+          { vertical: 1 },
+          {
+            vertical: 0,
+            duration: 5,
+            ease: 'sine.inOut',
+            onUpdate: function() {
+              const offset = this.targets()[0].vertical
+              camera.lookAt(
+                targetPosition[0],
+                targetPosition[1] + offset * 1.5,
+                targetPosition[2]
+              )
+            }
+          }
+        )
+    }
+
     functionsRef.current.animateToDefault = () => {
       onPOIEnter(false)
-      poiLookAtRef.current = null
+
+      if (lookAroundTimelineRef.current) {
+        lookAroundTimelineRef.current.kill()
+        lookAroundTimelineRef.current = null
+      }
 
       const startPosition = {
         x: camera.position.x,
@@ -111,7 +258,8 @@ export const useCameraAnimation = (camera, onPOIEnter, cameraAnimationRef) => {
 
     cameraAnimationRef.current = functionsRef.current.animateCameraToPosition
     cameraAnimationRef.current.goBack = functionsRef.current.animateToDefault
-  }, [camera, onPOIEnter, cameraAnimationRef])
+  }, [camera, onPOIEnter, cameraAnimationRef, onAnimationComplete])
 
   return { orbitControlsRef, defaultPositionRef }
 }
+
