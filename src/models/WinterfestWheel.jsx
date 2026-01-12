@@ -335,4 +335,4 @@ export function Model(props) {
   )
 }
 
-useGLTF.preload('/model/winterfest-wheel.glb')
+useGLTF.preload('./model/winterfest-wheel.glb')

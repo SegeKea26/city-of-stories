@@ -77,4 +77,4 @@ export function Model(props) {
   )
 }
 
-useGLTF.preload('/model/winterfest-area.glb')
+useGLTF.preload('./model/winterfest-area.glb')

@@ -2027,4 +2027,4 @@ export function Model(props) {
   )
 }
 
-useGLTF.preload('/model/winterfest-cabin.glb')
+useGLTF.preload('./model/winterfest-cabin.glb')
