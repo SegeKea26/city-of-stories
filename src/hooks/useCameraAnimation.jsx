@@ -9,7 +9,7 @@ const VIEWING_DISTANCE = 3.5
 const HORIZONTAL_LOOK_RANGE = 2
 const VERTICAL_LOOK_RANGE = 1.5
 
-export const useCameraAnimation = (camera, onPOIEnter, cameraAnimationRef, onAnimationComplete) => {
+export const useCameraAnimation = (camera, onPOIEnter, cameraAnimationRef) => {
   const defaultPositionRef = useRef({ x: 0, y: 40, z: 80 })
   const orbitControlsRef = useRef()
   const lookAroundTimelineRef = useRef(null)
@@ -40,7 +40,7 @@ export const useCameraAnimation = (camera, onPOIEnter, cameraAnimationRef, onAni
       ]
     }
 
-    const animateCameraToPOI = (targetPosition, customCameraPosition) => {
+    const animateCameraToPOI = (targetPosition, customCameraPosition, keepCentered = false) => {
       onPOIEnter(true)
       stopLookAround()
 
@@ -52,30 +52,61 @@ export const useCameraAnimation = (camera, onPOIEnter, cameraAnimationRef, onAni
         z: camera.position.z
       }
       
-      gsap.to(cameraPos, {
-        x: finalCameraPosition[0],
-        y: finalCameraPosition[1],
-        z: finalCameraPosition[2],
-        duration: CAMERA_MOVE_DURATION,
-        ease: 'power1.inOut',
-        onUpdate: () => {
-          camera.position.set(cameraPos.x, cameraPos.y, cameraPos.z)
-          camera.lookAt(targetPosition[0], targetPosition[1], targetPosition[2])
-        },
-        onComplete: () => {
-          camera.lookAt(targetPosition[0], targetPosition[1], targetPosition[2])
-          startLookAroundAnimation(targetPosition)
+      if (keepCentered) {
+        if (orbitControlsRef.current) {
+          orbitControlsRef.current.enableRotate = false
         }
-      })
 
-      if (orbitControlsRef.current) {
-        gsap.to(orbitControlsRef.current.target, {
-          x: targetPosition[0],
-          y: targetPosition[1],
-          z: targetPosition[2],
+        gsap.to(cameraPos, {
+          x: finalCameraPosition[0],
+          y: finalCameraPosition[1],
+          z: finalCameraPosition[2],
           duration: CAMERA_MOVE_DURATION,
-          ease: 'power1.inOut'
+          ease: 'power1.inOut',
+          onUpdate: () => {
+            camera.position.set(cameraPos.x, cameraPos.y, cameraPos.z)
+            camera.lookAt(targetPosition[0], targetPosition[1], targetPosition[2])
+            if (orbitControlsRef.current) {
+              orbitControlsRef.current.target.set(targetPosition[0], targetPosition[1], targetPosition[2])
+              orbitControlsRef.current.update()
+            }
+          },
+          onComplete: () => {
+            camera.lookAt(targetPosition[0], targetPosition[1], targetPosition[2])
+            if (orbitControlsRef.current) {
+              orbitControlsRef.current.target.set(targetPosition[0], targetPosition[1], targetPosition[2])
+              orbitControlsRef.current.update()
+              orbitControlsRef.current.enableRotate = true
+            }
+            startLookAroundAnimation(targetPosition)
+          }
         })
+      } else {
+        gsap.to(cameraPos, {
+          x: finalCameraPosition[0],
+          y: finalCameraPosition[1],
+          z: finalCameraPosition[2],
+          duration: CAMERA_MOVE_DURATION,
+          ease: 'power1.inOut',
+          onUpdate: () => {
+            camera.position.set(cameraPos.x, cameraPos.y, cameraPos.z)
+            camera.lookAt(targetPosition[0], targetPosition[1], targetPosition[2])
+          },
+          onComplete: () => {
+            camera.lookAt(targetPosition[0], targetPosition[1], targetPosition[2])
+            startLookAroundAnimation(targetPosition)
+          }
+        })
+
+        if (orbitControlsRef.current) {
+          gsap.to(orbitControlsRef.current.target, {
+            x: targetPosition[0],
+            y: targetPosition[1],
+            z: targetPosition[2],
+            duration: CAMERA_MOVE_DURATION,
+            ease: 'power1.inOut'
+          })
+        }
       }
     }
 
@@ -94,10 +125,6 @@ export const useCameraAnimation = (camera, onPOIEnter, cameraAnimationRef, onAni
       const distanceX = Math.abs(camera.position.x - targetPosition[0])
       const distanceZ = Math.abs(camera.position.z - targetPosition[2])
       const horizontalAxis = distanceX > distanceZ ? 'z' : 'x'
-      
-      if (onAnimationComplete) {
-        onAnimationComplete()
-      }
       
       const timeline = gsap.timeline({ repeat: -1 })
       lookAroundTimelineRef.current = timeline
@@ -188,7 +215,7 @@ export const useCameraAnimation = (camera, onPOIEnter, cameraAnimationRef, onAni
     cameraAnimationRef.current = animateCameraToPOI
     
     cameraAnimationRef.current.goBack = returnToDefaultPosition
-  }, [camera, onPOIEnter, cameraAnimationRef, onAnimationComplete])
+  }, [camera, onPOIEnter, cameraAnimationRef])
 
   return { orbitControlsRef, defaultPositionRef }
 }

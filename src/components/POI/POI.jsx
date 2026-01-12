@@ -2,7 +2,7 @@ import { Html } from '@react-three/drei'
 import { useState, useEffect } from 'react'
 import './POI.css'
 
-export function POI({ position, onClick, label }) {
+export function POI({ position, onClick, label, number }) {
   const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
@@ -38,7 +38,9 @@ export function POI({ position, onClick, label }) {
           data-poi-label={label}
         >
           {isHovered && <div className="poi__label">{label}</div>}
-          <div className="poi__dot" data-poi-label={label} />
+          <div className="poi__dot" data-poi-label={label}>
+            {number && <span className="poi__number">{number}</span>}
+          </div>
         </div>
       </Html>
     </group>

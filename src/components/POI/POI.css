@@ -23,18 +23,53 @@
   }
 
   .poi__dot {
-    width: 1rem;
-    height: 1rem;
+    width: 1.5rem;
+    height: 1.5rem;
     border-radius: 50%;
 
     transition: all 0.2s ease;
 
-    background: rgba(244, 233, 255, 0.5);
+    background: rgba(244, 233, 255, 1);
+    border: 2px solid #E74C3C;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: -0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 0.5rem solid transparent;
+      border-right: 0.5rem solid transparent;
+      border-top: 0.5rem solid #E74C3C;
+      transition: all 0.2s ease;
+    }
+
+    .poi__number {
+      font-family: var(--ff-secondary);
+      font-size: 1rem;
+      font-weight: 800;
+      color: black;
+    }
   }
 
   &:hover .poi__dot {
     transform: scale(1.125);
-    background: #F4E9FF;
+    background: rgba(244, 233, 255, 1);
+
+    &::after {
+      border-top-color: #E74C3C;
+    }
+
+    .poi__number {
+      color: rgba(30, 21, 32, 0.9);
+    }
   }
 }
 

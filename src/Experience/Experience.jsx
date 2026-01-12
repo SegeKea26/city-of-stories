@@ -53,15 +53,14 @@ const CameraController = ({
   cartPositionRef, 
   isFollowingCart, 
   canvasClicked, 
-  onAnimationComplete 
+  isCameraAnimating
 }) => {
   const { camera } = useThree()
   
   const { orbitControlsRef } = useCameraAnimation(
     camera, 
     onPOIEnter, 
-    cameraAnimationRef, 
-    onAnimationComplete
+    cameraAnimationRef
   )
   
   useOrbitControlsSettings(orbitControlsRef, isViewingPOI, isTourMode, isFollowingCart)
@@ -70,7 +69,7 @@ const CameraController = ({
   
   useCartCameraFollower(cartPositionRef, isFollowingCart, cameraMode)
 
-  usePOICameraLookAround(isViewingPOI && !isTourMode, cameraMode)
+  usePOICameraLookAround(isViewingPOI && !isTourMode && !isCameraAnimating, cameraMode)
   
   const canRotate = !isFollowingCart && !isViewingPOI
   
@@ -88,6 +87,7 @@ const CameraController = ({
       maxAzimuthAngle={Infinity}
       minPolarAngle={MIN_POLAR_ANGLE}
       maxPolarAngle={MAX_POLAR_ANGLE}
+      makeDefault
     />
   )
 }
@@ -175,6 +175,11 @@ const Experience = () => {
       
       setCanvasClicked(true)
       setIsViewingPOI(true)
+      setIsCameraAnimating(true)
+      
+      setTimeout(() => {
+        setIsCameraAnimating(false)
+      }, 4000)
       
       if (cameraAnimationRef.current && poiId) {
         const poi = getPOIById(poiId)
@@ -212,7 +217,7 @@ const Experience = () => {
             buttons: buttons
           })
           
-          cameraAnimationRef.current(position, poi.cameraPosition)
+          cameraAnimationRef.current(position, poi.cameraPosition, true)
         }
       }
     }
@@ -295,7 +300,7 @@ const Experience = () => {
           cartPositionRef={cartPositionRef}
           isFollowingCart={isFollowingCart}
           canvasClicked={canvasClicked}
-          onAnimationComplete={() => setIsCameraAnimating(false)}
+          isCameraAnimating={isCameraAnimating}
         />
         
         <directionalLight 

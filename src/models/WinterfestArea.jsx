@@ -38,7 +38,8 @@ export function Model(props) {
           key={poi.id}
           position={poi.position} 
           label={poi.label} 
-          text={poi.text} 
+          text={poi.text}
+          number={poi.tourOrder}
           onClick={() => handlePOIClick(poi.position, poi.label, poi.text, poi.id)} 
         />
       ))}

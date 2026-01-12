@@ -22,7 +22,6 @@ export function Model(props) {
     }
   }, [nodes, materials, animations, onModelLoaded])
 
-  // Keep carts upright as wheel rotates
   useFrame(() => {
     if (group.current) {
       const wheelRoot = group.current.getObjectByName('WHEEL_ROOT')
@@ -44,7 +43,6 @@ export function Model(props) {
     }
   })
 
-  // Control wheel animation
   useEffect(() => {
     if (actions && animations.length > 0) {
       const wheelAnimation = actions[Object.keys(actions)[0]]
