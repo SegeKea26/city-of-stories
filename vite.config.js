@@ -10,4 +10,8 @@ export default defineConfig({
       },
     }),
   ],
+  assetsInclude: ['**/*.glb', '**/*.gltf'],
+  build: {
+    assetsInlineLimit: 0,
+  },
 })
