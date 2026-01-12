@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { Canvas, useThree } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 
@@ -7,52 +7,107 @@ import { Button } from "../components/Button/Button"
 import { Loader } from "../components/Loader/Loader"
 import { Notification } from "../components/Notification/Notification"
 import { Crosshair } from "../components/Crosshair/Crosshair"
-import Winterfest from "../models/Winterfest"
+
+import { Model as WinterfestWheel } from "../models/WinterfestWheel.jsx"
+import { Model as WinterfestCabin } from "../models/WinterfestCabin.jsx"
+import { Model as WinterfestArea } from "../models/WinterfestArea.jsx"
+
 import { WINTERFEST_HOME, getPOIById } from "../data/poiData"
 
-import { useCameraAnimation, usePOIManager, useOrbitControlsSettings, useCartCameraFollower, usePOICameraLookAround, useLoadingProgress, useViewerModePOIDetection, usePOINavigation, useCameraModeSwitcher, useFerrisWheel, useNotification, useWheelNotification } from "../hooks"
+import { 
+  useCameraAnimation, 
+  usePOIManager, 
+  useOrbitControlsSettings, 
+  useCartCameraFollower, 
+  usePOICameraLookAround, 
+  useLoadingProgress, 
+  useViewerModePOIDetection, 
+  usePOINavigation, 
+  useCameraModeSwitcher, 
+  useFerrisWheel, 
+  useNotification, 
+  useWheelNotification, 
+  useWindSound 
+} from "../hooks"
 
-const CartCameraFollower = ({ cartPositionRef, isFollowing, cameraMode }) => {
-  useCartCameraFollower(cartPositionRef, isFollowing, cameraMode)
-  return null
-}
+const CAMERA_FOV = 50
+const CAMERA_DEFAULT_POSITION = [0, 40, 80]
+const AUTO_ROTATE_SPEED = .75
+const MIN_POLAR_ANGLE = Math.PI / 2.5
+const MAX_POLAR_ANGLE = Math.PI / 2.5
 
-const POICameraLookAround = ({ isViewingPOI, isTourMode, cameraMode }) => {
-  usePOICameraLookAround(isViewingPOI && !isTourMode, cameraMode)
-  return null
-}
+const FOG_COLOR = '#1a1520'
+const FOG_NEAR = 50
+const FOG_FAR = 200
+const DIRECTIONAL_LIGHT_INTENSITY = 1.2
+const DIRECTIONAL_LIGHT_COLOR = '#ffe0cc'
+const AMBIENT_LIGHT_INTENSITY = 0.5
+const AMBIENT_LIGHT_COLOR = '#fff5f0'
 
-const CameraController = ({ cameraAnimationRef, onPOIEnter, isViewingPOI, isTourMode, cameraMode, cartPositionRef, isFollowingCart, canvasClicked, onAnimationComplete }) => {
+const CameraController = ({ 
+  cameraAnimationRef, 
+  onPOIEnter, 
+  isViewingPOI, 
+  isTourMode, 
+  cameraMode, 
+  cartPositionRef, 
+  isFollowingCart, 
+  canvasClicked, 
+  onAnimationComplete 
+}) => {
   const { camera } = useThree()
-  const { orbitControlsRef } = useCameraAnimation(camera, onPOIEnter, cameraAnimationRef, onAnimationComplete)
+  
+  const { orbitControlsRef } = useCameraAnimation(
+    camera, 
+    onPOIEnter, 
+    cameraAnimationRef, 
+    onAnimationComplete
+  )
   
   useOrbitControlsSettings(orbitControlsRef, isViewingPOI, isTourMode, isFollowingCart)
+  
   useViewerModePOIDetection(cameraMode, isViewingPOI)
   
+  useCartCameraFollower(cartPositionRef, isFollowingCart, cameraMode)
+
+  usePOICameraLookAround(isViewingPOI && !isTourMode, cameraMode)
+  
+  const canRotate = !isFollowingCart && !isViewingPOI
+  
+  const shouldAutoRotate = !canvasClicked && !isTourMode && !isViewingPOI
+  
   return (
-    <>
-      <OrbitControls  
-        ref={orbitControlsRef}
-        enablePan={false} 
-        enableZoom={false} 
-        enableRotate={!isFollowingCart && !isViewingPOI}
-        autoRotate={!canvasClicked && !isTourMode && !isViewingPOI}
-        autoRotateSpeed={2}
-        minAzimuthAngle={-Infinity}
-        maxAzimuthAngle={Infinity}
-        minPolarAngle={Math.PI / 2.5}
-        maxPolarAngle={Math.PI / 2.5}
-      />
-      <CartCameraFollower cartPositionRef={cartPositionRef} isFollowing={isFollowingCart} cameraMode={cameraMode} />
-      <POICameraLookAround isViewingPOI={isViewingPOI && !isFollowingCart} isTourMode={isTourMode} cameraMode={cameraMode} />
-    </>
+    <OrbitControls  
+      ref={orbitControlsRef}
+      enablePan={false} 
+      enableZoom={false} 
+      enableRotate={canRotate}
+      autoRotate={shouldAutoRotate}
+      autoRotateSpeed={AUTO_ROTATE_SPEED}
+      minAzimuthAngle={-Infinity}
+      maxAzimuthAngle={Infinity}
+      minPolarAngle={MIN_POLAR_ANGLE}
+      maxPolarAngle={MAX_POLAR_ANGLE}
+    />
   )
 }
 
 const Experience = () => {
+
   const cameraAnimationRef = useRef()
   const restartAnimationRef = useRef()
   const cartPositionRef = useRef([0, 0, 0])
+  
+  const handlePOIClickRef = useRef()
+  const handleCartPositionUpdateRef = useRef()
+  const handleRestartAnimationRef = useRef()
+  const handleBackClickRef = useRef()
+  const handleEnterFerrisWheelRef = useRef()
+  const handleExitWheelRef = useRef()
+  const handleNavigateToPOIRef = useRef()
+  const setNotificationDismissedRef = useRef()
+  const setWheelNotificationDismissedRef = useRef()
+  
   const [cameraMode, setCameraMode] = useState('grab')
   const [isCameraAnimating, setIsCameraAnimating] = useState(false)
   
@@ -71,8 +126,17 @@ const Experience = () => {
     setCanvasClicked
   } = usePOIManager()
 
-  const { notificationDismissed, setNotificationDismissed } = useNotification(isViewingPOI, isTourMode)
-  const { wheelNotificationDismissed, setWheelNotificationDismissed } = useWheelNotification(isFollowingCart, isTourMode)
+  const { notificationDismissed, setNotificationDismissed } = useNotification(
+    isViewingPOI, 
+    isTourMode
+  )
+  
+  const { wheelNotificationDismissed, setWheelNotificationDismissed } = useWheelNotification(
+    isFollowingCart, 
+    isTourMode
+  )
+
+  useWindSound(isFollowingCart)
 
   const { handleNavigateToPOI } = usePOINavigation(
     cameraAnimationRef,
@@ -93,51 +157,114 @@ const Experience = () => {
 
   useCameraModeSwitcher(isViewingPOI, isTourMode, setCameraMode, isFollowingCart)
 
-  const handleBackClick = () => {
-    if (cameraAnimationRef.current?.goBack) {
-      cameraAnimationRef.current.goBack()
+  useEffect(() => {
+    handleBackClickRef.current = () => {
+      if (cameraAnimationRef.current?.goBack) {
+        cameraAnimationRef.current.goBack()
+      }
+      
+      setCurrentPOIInfo({ label: '', text: '' })
+      setIsFollowingCart(false)
+      setIsCameraAnimating(false)
     }
-    setCurrentPOIInfo({ label: '', text: '' })
-    setIsFollowingCart(false)
-    setIsCameraAnimating(false)
-  }
+  })
 
-  const handlePOIClick = (position, label, text, poiId) => {
-    if (isFollowingCart) return
-    
-    setCanvasClicked(true)
-    setIsViewingPOI(true)
-    
-    if (cameraAnimationRef.current && poiId) {
-      const poi = getPOIById(poiId)
-      if (poi && poi.cameraPosition) {
-        const buttons = []
-        if (poi.prevId) {
-          buttons.push({ label: poi.prevId === 'winterfest' ? 'back' : 'back', onClick: () => handleNavigateToPOI(poi.prevId) })
-        }
-        if (poi.nextId) {
-          buttons.push({ label: poi.nextId === 'winterfest' ? 'end' : 'next', onClick: () => handleNavigateToPOI(poi.nextId) })
-        }
+  useEffect(() => {
+    handlePOIClickRef.current = (position, label, text, poiId) => {
+      if (isFollowingCart) return
+      
+      setCanvasClicked(true)
+      setIsViewingPOI(true)
+      
+      if (cameraAnimationRef.current && poiId) {
+        const poi = getPOIById(poiId)
         
-        setCurrentPOIInfo({ 
-          label: poi.label, 
-          text: poi.text,
-          image1: poi.image1,
-          image2: poi.image2,
-          buttons: buttons
-        })
-        cameraAnimationRef.current(position, poi.cameraPosition)
+        if (poi && poi.cameraPosition) {
+          const createTourNavigationButtons = (poi) => {
+            const buttons = []
+            
+            if (poi.prevId) {
+              const label = poi.prevId === 'winterfest' ? 'back' : 'back'
+              buttons.push({ 
+                label, 
+                onClick: () => handleNavigateToPOIRef.current(poi.prevId) 
+              })
+            }
+            
+            if (poi.nextId) {
+              const label = poi.nextId === 'winterfest' ? 'end' : 'next'
+              buttons.push({ 
+                label, 
+                onClick: () => handleNavigateToPOIRef.current(poi.nextId) 
+              })
+            }
+            
+            return buttons
+          }
+          
+          const buttons = createTourNavigationButtons(poi)
+          
+          setCurrentPOIInfo({ 
+            label: poi.label, 
+            text: poi.text,
+            image1: poi.image1,
+            image2: poi.image2,
+            buttons: buttons
+          })
+          
+          cameraAnimationRef.current(position, poi.cameraPosition)
+        }
       }
     }
-  }
+  })
 
-  const handleCartPositionUpdate = (position) => {
-    cartPositionRef.current = position
-  }
+  useEffect(() => {
+    handleCartPositionUpdateRef.current = (position) => {
+      cartPositionRef.current = position
+    }
+  })
 
-  const handleRestartAnimation = (restartFn) => {
-    restartAnimationRef.current = restartFn
-  }
+  useEffect(() => {
+    handleRestartAnimationRef.current = (restartFn) => {
+      restartAnimationRef.current = restartFn
+    }
+  })
+
+  useEffect(() => {
+    handleNavigateToPOIRef.current = handleNavigateToPOI
+  })
+
+  useEffect(() => {
+    handleEnterFerrisWheelRef.current = handleEnterFerrisWheel
+  })
+
+  useEffect(() => {
+    handleExitWheelRef.current = handleExitWheel
+  })
+
+  useEffect(() => {
+    setNotificationDismissedRef.current = setNotificationDismissed
+  })
+
+  useEffect(() => {
+    setWheelNotificationDismissedRef.current = setWheelNotificationDismissed
+  })
+
+  const stableHandlePOIClick = (...args) => handlePOIClickRef.current?.(...args)
+  const stableHandleCartPositionUpdate = (...args) => handleCartPositionUpdateRef.current?.(...args)
+  const stableHandleRestartAnimation = (...args) => handleRestartAnimationRef.current?.(...args)
+  const stableHandleBackClick = (...args) => handleBackClickRef.current?.(...args)
+  const stableHandleEnterFerrisWheel = (...args) => handleEnterFerrisWheelRef.current?.(...args)
+  const stableHandleExitWheel = (...args) => handleExitWheelRef.current?.(...args)
+  const stableHandleNavigateToPOI = (...args) => handleNavigateToPOIRef.current?.(...args)
+  const stableSetNotificationDismissed = (...args) => setNotificationDismissedRef.current?.(...args)
+  const stableSetWheelNotificationDismissed = (...args) => setWheelNotificationDismissedRef.current?.(...args)
+
+  const shouldShowHomeScreen = !isViewingPOI && !isFollowingCart && canvasClicked
+  
+  const shouldShowPOIInfo = isViewingPOI && !isFollowingCart && currentPOIInfo.label
+  
+  const isAtFerrisWheelEntrance = isViewingPOI && currentPOIInfo.label === 'Wheel Cashier' && !isFollowingCart
 
   return (
     <>
@@ -150,9 +277,15 @@ const Experience = () => {
           powerPreference: 'high-performance'
         }}
       >
-        <fog attach="fog" args={['#1a1520', 50, 200]} />
+
+        <fog attach="fog" args={[FOG_COLOR, FOG_NEAR, FOG_FAR]} />
         
-        <PerspectiveCamera makeDefault position={[0, 40, 80]} fov={50} />
+        <PerspectiveCamera 
+          makeDefault 
+          position={CAMERA_DEFAULT_POSITION} 
+          fov={CAMERA_FOV} 
+        />
+        
         <CameraController 
           cameraAnimationRef={cameraAnimationRef} 
           onPOIEnter={setIsViewingPOI} 
@@ -165,30 +298,46 @@ const Experience = () => {
           onAnimationComplete={() => setIsCameraAnimating(false)}
         />
         
+        <directionalLight 
+          position={[10, 20, 10]} 
+          intensity={DIRECTIONAL_LIGHT_INTENSITY} 
+          color={DIRECTIONAL_LIGHT_COLOR} 
+        />
+        <ambientLight 
+          intensity={AMBIENT_LIGHT_INTENSITY} 
+          color={AMBIENT_LIGHT_COLOR} 
+        />
         
-        <directionalLight position={[10, 20, 10]} intensity={1.2} color="#ffe0cc" />
-        <ambientLight intensity={0.5} color="#fff5f0" />
-        
-        <Winterfest 
-          onPOIClick={handlePOIClick}
-          onCartPositionUpdate={handleCartPositionUpdate}
-          onRestartAnimation={handleRestartAnimation}
-          onModelLoaded={handleModelLoaded}
+        <WinterfestArea 
+          onPOIClick={stableHandlePOIClick} 
           isTourMode={isTourMode}
+          onModelLoaded={handleModelLoaded}
+        />
+
+        <WinterfestCabin
+          onModelLoaded={handleModelLoaded}
+        />
+
+        <WinterfestWheel 
+          onCartPositionUpdate={stableHandleCartPositionUpdate} 
+          isFollowingCart={isFollowingCart}
+          onModelLoaded={handleModelLoaded}
+          onRestartAnimation={stableHandleRestartAnimation}
         />
       </Canvas>
       
       <Loader isLoading={isLoading} progress={loadProgress} />
+      
       <Button 
         visible={isViewingPOI && !isTourMode} 
-        onClick={handleBackClick} 
+        onClick={stableHandleBackClick} 
         label="Home" 
       />
 
-      {isViewingPOI && currentPOIInfo.label === 'Wheel Cashier' && !isFollowingCart && (
+      {isAtFerrisWheelEntrance && (
         <button 
           className="enter-ferris-button"
-          onClick={handleEnterFerrisWheel}
+          onClick={stableHandleEnterFerrisWheel}
         >
           Enter Ferris Wheel
         </button>
@@ -197,13 +346,13 @@ const Experience = () => {
       {isFollowingCart && (
         <button 
           className="enter-ferris-button"
-          onClick={handleExitWheel}
+          onClick={stableHandleExitWheel}
         >
           Exit Wheel
         </button>
       )}
 
-      {!isViewingPOI && !isFollowingCart && canvasClicked && (
+      {shouldShowHomeScreen && (
         <POIInfo 
           visible={true} 
           label={WINTERFEST_HOME.label}
@@ -213,12 +362,12 @@ const Experience = () => {
           buttonLabel={WINTERFEST_HOME.buttonLabel}
           onButtonClick={() => {
             setIsTourMode(true)
-            handleNavigateToPOI('cecemel-cabin')
+            stableHandleNavigateToPOI('cecemel-cabin')
           }}
         />
       )}
 
-      {isViewingPOI && !isFollowingCart && currentPOIInfo.label && (
+      {shouldShowPOIInfo && (
         <POIInfo 
           visible={true} 
           label={currentPOIInfo.label}
@@ -226,7 +375,9 @@ const Experience = () => {
           image1={currentPOIInfo.image1}
           image2={currentPOIInfo.image2}
           buttons={
-            isTourMode && currentPOIInfo.buttons && currentPOIInfo.buttons.length > 0 ? currentPOIInfo.buttons : []
+            isTourMode && currentPOIInfo.buttons && currentPOIInfo.buttons.length > 0 
+              ? currentPOIInfo.buttons 
+              : []
           }
           buttonsDisabled={isCameraAnimating}
         />
@@ -240,13 +391,16 @@ const Experience = () => {
         visible={!notificationDismissed && isViewingPOI && !isTourMode}
         cameraMode={cameraMode}
         type="camera"
-        onDismiss={() => setNotificationDismissed(true)}
+        onDismiss={() => stableSetNotificationDismissed(true)}
       />
+      
       <Notification 
         visible={!wheelNotificationDismissed && isFollowingCart && isTourMode}
         type="wheel"
-        onDismiss={() => setWheelNotificationDismissed(true)}
+        onDismiss={() => stableSetWheelNotificationDismissed(true)}
       />
+
+
     </>
   )
 }
