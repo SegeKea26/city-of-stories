@@ -51,7 +51,7 @@ export const POI_DATA = [
     id: 'wheel-cashier',
     position: [0, 2, 5],
     cameraPosition: [0, 2, 12],
-    label: 'Wheel Cashier',
+    label: 'Wheel',
     tourOrder: 5,
     text: 'At the beating heart of the winter fair stands this iconic booth, a gateway to adventure and wonder. Here, tickets are exchanged for dreams of spinning wheels, delightful rides, and cherished memories. The ferris wheel looms majestically beyond, a testament to the joy and magic that awaits those who venture forth into this winter wonderland.',
     image1: './images/wheel.png',
