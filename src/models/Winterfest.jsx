@@ -53,9 +53,6 @@ export function Winterfest(props) {
       }, 600)
     }
   }, [nodes, materials, animations, onModelLoaded])
-
-  // Door bepaalde textures crasht de browser soms, deze code vervangt deze textures met simpele kleuren om dit tegen te gaan.
-  // =========================================
   
   useFrame(() => {
     if (group.current) {
