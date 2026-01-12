@@ -7,7 +7,7 @@ export function Model(props) {
   const { onCartPositionUpdate, onRestartAnimation, onModelLoaded } = props
   const group = useRef()
   const hasLoadedRef = useRef(false)
-  const { nodes, materials, animations } = useGLTF('/model/winterfest-wheel.glb')
+  const { nodes, materials, animations } = useGLTF('./model/winterfest-wheel.glb')
   const { actions } = useAnimations(animations, group)
   
   useEffect(() => {

@@ -11,7 +11,7 @@ import { POI_DATA } from '../data/poiData'
 export function Model(props) {
   const { onPOIClick, isTourMode, onModelLoaded } = props
   const hasLoadedRef = useRef(false)
-  const { nodes, materials } = useGLTF('/model/winterfest-area.glb')
+  const { nodes, materials } = useGLTF('./model/winterfest-area.glb')
   
   useEffect(() => {
     if (nodes && materials && !hasLoadedRef.current) {

@@ -9,7 +9,7 @@ import { useGLTF } from '@react-three/drei'
 export function Model(props) {
   const { onModelLoaded } = props
   const hasLoadedRef = useRef(false)
-  const { nodes, materials } = useGLTF('/model/winterfest-cabin.glb')
+  const { nodes, materials } = useGLTF('./model/winterfest-cabin.glb')
   
   useEffect(() => {
     if (nodes && materials && !hasLoadedRef.current) {
